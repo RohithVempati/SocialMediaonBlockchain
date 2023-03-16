@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Postcoin Content Platform</title>
+  <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body class="bg-colour">
+
+  <h1 class="heading font-color">Postcoin Content Platform</h1>
+<div style="float:left;margin-left: 3%;">
+<div class="position-container">
+  <h2 class="search-heading font-color">Search Posts</h2>
+  <form id="searchForm">
+    <label class="title font-color" for="searchQuery">Search Query:</label><br>
+    <input placeholder="Enter Search Query" class="input" type="text" id="searchQuery" name="searchQuery" required><br>
+    <input class="btn" type="submit" value="Search">
+  </form>
+</div>
+<div class="position-container">
+  <h2 class="create-post-heading font-color">Create Post</h2>
+  <form id="createPostForm">
+    <label class="title font-color" for="postTitle">Title:</label><br>
+    <input placeholder="Enter Title" class="input" type="text" id="postTitle" name="postTitle" required><br>
+    <label class="title font-color" for="postContent">Content:</label><br>
+    <textarea placeholder="Enter Content" class="textarea" id="postContent" name="postContent" rows="5" required></textarea><br>
+    <input class="btn" type="submit" value="Submit">
+  </form>
+</div> </div>
+  <div class="posts-container">
+  <div id="posts" class="posts"></div>
+</div> 
+
+  <script>
+
+    const postcoinContractAddress = "0x7F73Bf431bE676de9c193c10Fc359bba45e7C5a4";
+    const postcoinContractABI = [
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_title",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_body",
+				"type": "string"
+			}
+		],
+		"name": "createPost",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "postId",
+				"type": "uint256"
+			}
+		],
+		"name": "downvote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "downvoted",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getPostCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getPosts",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "posts",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "title",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "body",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "votes",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "postId",
+				"type": "uint256"
+			}
+		],
+		"name": "upvote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "upvoted",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
+const provider = window.ethereum;
+const web3 = new Web3(provider);
+const postcoinContract = new web3.eth.Contract(postcoinContractABI, postcoinContractAddress);
+
+
+
+
+
+async function init() {
+
+  if (typeof window.ethereum === 'undefined') {
+	window.alert("Please install MetaMask to Contine");
+    return console.error('MetaMask is not installed');
+	
+
+  }
+console.log("postcoinContractABI:", postcoinContractABI);
+//const postcoinContract = new web3.eth.Contract(postcoinContractABI, postcoinContractAddress);
+
+  // Access the Ethereum-enabled browser's provider
+  //const provider = window.ethereum;
+
+  try {
+    // Request account access if needed
+    await provider.request({ method: 'eth_requestAccounts' });
+  } catch (error) {
+    // User denied account access...
+    console.error("User denied account access");
+    return;
+  }
+    async function createPost(event) {
+      event.preventDefault();
+
+      const postTitle = document.getElementById("postTitle").value;
+      const postContent = document.getElementById("postContent").value;
+
+      const result = await postcoinContract.methods.createPost(postTitle, postContent).send({ from: web3.eth.defaultAccount });
+      console.log("Transaction result:", result);
+
+      fetchPosts();
+    }
+
+    async function upvotePost(postId) {
+      const result = await postcoinContract.methods.upvote(postId).send({ from: web3.eth.defaultAccount });
+      console.log("Transaction result:", result);
+
+      fetchPosts();
+    }
+
+    async function downvotePost(postId) {
+      const result = await postcoinContract.methods.downvote(postId).send({ from: web3.eth.defaultAccount });
+      console.log("Transaction result:", result);
+
+      fetchPosts();
+    }
+ async function fetchPosts() {
+      const postsElement = document.getElementById("posts");
+      postsElement.innerHTML = "";
+
+      const postCount = await postcoinContract.methods.getPostCount().call();
+      console.log("Post count:", postCount);
+
+      for (let i = postCount-1; i >=0 ; i--) {
+        const post = await postcoinContract.methods.posts(i).call();
+        console.log("Post:", post);
+
+        const postElement = document.createElement("div");
+        postElement.innerHTML = `
+		<div class="posts-box-container">
+          <h3>${post.title}</h3>
+          <p>${post.body}</p>
+          <p>Posted by: ${post.owner}</p>
+          <p>Post ID: ${post.id}</p>
+          <p>Upvotes: ${post.votes}</p>
+          <button class="button btn"  onclick="upvotePost(${post.id})">UPVOTE</button>
+          <button class="button btn" onclick="downvotePost(${post.id})">DOWNVOTE</button>
+		  </div>
+        `;
+
+        postsElement.appendChild(postElement);
+      }
+    }
+
+    async function createPost(event) {
+      event.preventDefault();
+
+      const postTitle = document.getElementById("postTitle").value;
+      const postContent = document.getElementById("postContent").value;
+
+      const result = await postcoinContract.methods.createPost(postTitle, postContent).send({ from: web3.eth.defaultAccount });
+      console.log("Transaction result:", result);
+
+      fetchPosts();
+    }
+
+    async function upvotePost(postId) {
+      const result = await postcoinContract.methods.upvote(postId).send({ from: web3.eth.defaultAccount }).call();
+      console.log("Transaction result:", result);
+
+      fetchPosts();
+    }
+
+    async function downvotePost(postId) {
+      const result = await postcoinContract.methods.downvote(postId).send({ from: web3.eth.defaultAccount });
+      console.log("Transaction result:", result);
+
+      fetchPosts();
+    }
+
+  // Create a new web3 instance using the provider
+  //const web3 = new Web3(provider);
+
+  // Use the web3 instance to interact with the smart contract
+  //const postcoinContract = new web3.eth.Contract(postcoinContractABI, postcoinContractAddress);
+
+  const accounts = await web3.eth.getAccounts();
+  web3.eth.defaultAccount = accounts[0];
+
+  fetchPosts();
+
+  const createPostForm = document.getElementById("createPostForm");
+  createPostForm.addEventListener("submit", createPost);
+}
+async function upvotePost(postId) {
+      const result = await postcoinContract.methods.upvote(postId).send({ from: web3.eth.defaultAccount });
+      console.log("Transaction result:", result);
+
+      fetchPosts();
+    }
+
+    async function downvotePost(postId) {
+      const result = await postcoinContract.methods.downvote(postId).send({ from: web3.eth.defaultAccount });
+      console.log("Transaction result:", result);
+
+      fetchPosts();
+    }
+const searchForm = document.getElementById("searchForm");
+searchForm.addEventListener("submit", searchPosts);
+async function searchPosts(event) {
+  event.preventDefault();
+
+  const searchQuery = document.getElementById("searchQuery").value;
+
+  const postsElement = document.getElementById("posts");
+  postsElement.innerHTML = "";
+
+  const postCount = await postcoinContract.methods.getPostCount().call();
+  console.log("Post count:", postCount);
+
+  const posts = [];
+
+  for (let i = 0; i < postCount; i++) {
+    const post = await postcoinContract.methods.posts(i).call();
+    console.log("Post:", post);
+    posts.push(post);
+  }
+
+  const filteredPosts = posts.filter(post => {
+    return post.title.includes(searchQuery) || post.body.includes(searchQuery);
+  });
+
+  for (let i = 0; i < filteredPosts.length; i++) {
+    const post = filteredPosts[i];
+
+    const postElement = document.createElement("div");
+    postElement.innerHTML = `<div class="posts-box-container">
+      <h3>${post.title}</h3>
+      <p>${post.body}</p>
+      <p>Posted by: ${post.owner}</p>
+      <p>Post ID: ${post.id}</p>
+      <p>Upvotes: ${post.votes}</p>
+      <button class="button btn" onclick="upvotePost(${post.id})">Upvote</button>
+      <button class="button btn" onclick="downvotePost(${post.id})">Downvote</button> </div>
+    `;
+
+    postsElement.appendChild(postElement);
+  }
+}
+
+    init();
+  </script>
+</body>
+</html>

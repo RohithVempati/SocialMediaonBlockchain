@@ -1,0 +1,68 @@
+.bg-colour {
+    background-image: linear-gradient(#48d7f0,#48d7f0);
+    background-size: cover;
+    overflow: auto;
+    padding: 15px;
+    }
+    .heading{
+        font-family: "Franklin Gothic Medium";
+        font-size: 40px;
+        text-align: center;
+        font-weight: 700;
+    }
+    .create-post-heading{
+        font-size: 36px;
+    }
+    .title{
+        font-size: 20px;
+    }
+    .input{
+        width: 250px;
+        height: 25px;
+        outline: none;
+        border:solid 1px #18424a;
+        margin-bottom: 10px;
+    }
+    .textarea{
+        width: 250px;
+        height: 150px;
+        margin-bottom: 10px;
+        outline: none;
+        border:solid 1px #18424a;
+    }
+    .btn{
+        background-color: #030640;
+        color: white;
+        border-radius: 8px;
+        width: 100px;
+        height: 30px;
+        cursor: pointer;
+    }
+    .font-color{
+        color: white;
+    }
+    .posts-container{
+        float:right;
+	margin-right: 5%;
+        border: solid 4px #ffffff;
+        border-radius: 5px;
+        padding: 10px;
+        width: 60vw;
+        padding-left: 25px;
+        overflow: auto;
+        flex-wrap: wrap;
+    }
+    .button{
+        margin-right: 8%;
+        padding: 5px;
+    }
+    .posts{
+        margin-bottom: 6%;
+    }
+.posts-box-container{
+   background-color: #ffffff;
+   border-radius: 8px;
+   border: solid 2px #18424a;
+    margin: 5%;
+    padding: 5%;
+}
