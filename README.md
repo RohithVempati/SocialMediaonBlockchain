@@ -50,3 +50,7 @@ But for posting, upvoting and downvoting, transactions are required as the user 
 
 # Note
 This project is not completed yet, and there will further changes to the current solidity code.
+Must make changes after 10-15 days, must make it look good. only running on browsers with metamask extension, must fix it.
+
+
+
